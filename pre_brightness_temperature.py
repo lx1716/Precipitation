@@ -983,7 +983,7 @@ def read_txt2list(path):
 
 
 def validate_autoregressive_model(fixed_model, inference_frames, device, frame_history):
-    fixed_model_0, fixed_model_1, fixed_model_2,  fixed_model_3 = fixed_model
+    fixed_model_0, fixed_model_1, fixed_model_2 = fixed_model
     torch.cuda.empty_cache()
 
     dataset_path = "FY4B_IR_brightness_temperature_dataset_path"
@@ -1120,7 +1120,7 @@ def validate_autoregressive_model(fixed_model, inference_frames, device, frame_h
                     stacked_timestamp = torch.stack((first_timestamp, second_timestamp), dim=0)
                     stacked_timestamp = stacked_timestamp.float()
 
-                    output = fixed_model_3(stacked_timestamp, tembs[idx]).squeeze()
+                    output = fixed_model_2(stacked_timestamp, tembs[idx]).squeeze()
 
                 predictions.append(output.cpu())
                 pred = copy.deepcopy(output.cpu().squeeze())
@@ -1224,22 +1224,9 @@ if __name__ == "__main__":
     fixed_model_2.load_state_dict(state_dict_fixed)
     fixed_model_2 = fixed_model_2.eval()
 
-
-    fixed_model_3 = copy.deepcopy(model)
-    checkpoint_path_fixed = "path_to_model_3"
-
-    checkpoint_fixed = torch.load(checkpoint_path_fixed, map_location="cuda:%d" % device_number)
-    state_dict_fixed = checkpoint_fixed['state_dict']
-
-    # 删除前缀'module.'
-    for key in list(state_dict_fixed.keys()):
-        state_dict_fixed[key[7:]] = state_dict_fixed.pop(key)
-    fixed_model_3.load_state_dict(state_dict_fixed)
-    fixed_model_3 = fixed_model_3.eval()
-
     inference_frames = 10
 
-    validate_autoregressive_model((fixed_model,fixed_model_1, fixed_model_2, fixed_model_3,
+    validate_autoregressive_model((fixed_model,fixed_model_1, fixed_model_2,
                                    ), inference_frames,device_number, 2)
 
 
